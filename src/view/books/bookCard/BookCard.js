@@ -23,10 +23,10 @@ const BookCard = (props) => {
 
       <CardBody className="d-flex align-items-end">
         <Button onClick={onEditBook} color="primary" className="ms-auto">
-          <i class="bi bi-pencil-square"></i>
+          <i className="bi bi-pencil-square"></i>
         </Button>
         <Button onClick={onDeleteBook} color="danger" className="ms-3">
-          <i class="bi bi-trash"></i>
+          <i className="bi bi-trash"></i>
         </Button>
       </CardBody>
     </Card>

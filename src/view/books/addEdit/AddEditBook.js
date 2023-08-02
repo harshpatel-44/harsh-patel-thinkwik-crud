@@ -1,14 +1,7 @@
-import { ErrorMessage, Field, Formik, useFormik } from "formik";
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from "react";
+import { useFormik } from "formik";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router";
-import { Link } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
 import {
   Button,
   Form,
@@ -18,13 +11,13 @@ import {
   Label,
   Spinner,
 } from "reactstrap";
+import Swal from "sweetalert2";
+import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
-import { handleUserLogin } from "../../../redux/action/auth";
 import {
   handleAddBook,
   handleUpdateBookData,
 } from "../../../redux/action/bookActions";
-import Swal from "sweetalert2";
 
 const genreList = [
   "Select a Genre",
@@ -42,7 +35,6 @@ const AddEditBook = () => {
 
   const navigate = useNavigate();
   const { bookId } = useParams();
-  const [editBookData, setEditBookData] = useState({});
   const [isLoading, setLoading] = useState(false);
   const [isEdit, setEdit] = useState(false);
 
@@ -64,37 +56,41 @@ const AddEditBook = () => {
       .label("Genre"),
   });
 
-  const onFormSubmit = async (values) => {
-    const { title, author, publishedYear, genre } = values;
-    try {
-      setLoading(true);
+  const onFormSubmit = useCallback(
+    async (values) => {
+      const { title, author, publishedYear, genre } = values;
+      try {
+        setLoading(true);
 
-      const apiData = {
-        id: isEdit ? editBookData.id : uuidv4(),
-        title,
-        author,
-        year: publishedYear,
-        genre,
-      };
+        const apiData = {
+          id: isEdit ? bookId : uuidv4(),
+          title,
+          author,
+          year: publishedYear,
+          genre,
+        }; // Book data for action handlers based on edit or add status
 
-      const addEditBookRes = isEdit
-        ? await handleUpdateBookData(apiData)
-        : await handleAddBook(apiData);
+        const addEditBookRes = isEdit
+          ? await handleUpdateBookData(apiData)
+          : await handleAddBook(apiData);
+        // Based on isEdit different handler will execute
 
-      return Swal.fire({
-        title: isEdit
-          ? "Book Updated Successfully!"
-          : "Book Added Successfully",
-        icon: "success",
-      }).then(() => {
-        navigate("/");
-      });
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+        return Swal.fire({
+          title: isEdit
+            ? "Book Updated Successfully!"
+            : "Book Added Successfully",
+          icon: "success",
+        }).then(() => {
+          navigate("/");
+        });
+      } catch (e) {
+        console.log(e);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isEdit, navigate, handleAddBook, handleUpdateBookData]
+  );
 
   const { handleSubmit, errors, touched, handleChange, setFieldValue, values } =
     useFormik({
@@ -109,15 +105,20 @@ const AddEditBook = () => {
     });
 
   useEffect(() => {
+    if (!bookId) return;
+
     const editBook = booksData.filter((book) => book.id === +bookId);
-    console.log(editBook);
+
+    //If book data is available based on book Id params form field will be auto fill
     if (editBook.length) {
       setEdit(true);
-      setEditBookData(editBook[0]);
       setFieldValue("title", editBook[0].title);
       setFieldValue("author", editBook[0].author);
       setFieldValue("publishedYear", editBook[0].year);
       setFieldValue("genre", editBook[0].genre);
+    } else {
+      navigate("/error");
+      //Wrong book id will redirect user to "Page not found" page
     }
   }, [bookId]);
 
@@ -136,7 +137,6 @@ const AddEditBook = () => {
       <div className="auth-wrapper">
         <div className="auth-inner">
           <h3>{isEdit ? "Edit " : "Add "} Book</h3>
-
           <Form onSubmit={handleSubmit}>
             <FormGroup>
               <Label for="title">Title</Label>
@@ -144,12 +144,11 @@ const AddEditBook = () => {
                 type="title"
                 name="title"
                 id="title"
-                placeholder="Enter your title"
+                placeholder="Enter title name"
                 onChange={handleChange}
                 value={values.title}
                 invalid={touched.title && !!errors.title}
               />
-
               {errors?.title && <FormFeedback> {errors?.title}</FormFeedback>}
             </FormGroup>
 
@@ -159,13 +158,14 @@ const AddEditBook = () => {
                 type="author"
                 name="author"
                 id="author"
-                placeholder="Enter your author"
+                placeholder="Enter author name"
                 onChange={handleChange}
                 value={values.author}
                 invalid={touched.author && !!errors.author}
               />
               {errors?.author && <FormFeedback> {errors?.author}</FormFeedback>}
             </FormGroup>
+
             <FormGroup>
               <Label for="publishedYear">Published Year</Label>
               <Input

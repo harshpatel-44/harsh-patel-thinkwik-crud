@@ -11,6 +11,7 @@ export const handleAddBook = async (bookData) => {
       type: ADD_BOOK,
       payload: bookData,
     });
+    //Dispatch Add book in book reducer
   } catch (e) {
     throw e;
   }
@@ -22,6 +23,7 @@ export const handleRemoveBook = async (bookId) => {
       type: REMOVE_BOOK,
       payload: bookId,
     });
+    //Dispatch remove book in book reducer
   } catch (e) {
     throw e;
   }
@@ -33,6 +35,7 @@ export const handleUpdateBookData = async (newBookData) => {
       type: UPDATE_BOOK,
       payload: newBookData,
     });
+    //Dispatch update book in book reducer
   } catch (e) {
     throw e;
   }

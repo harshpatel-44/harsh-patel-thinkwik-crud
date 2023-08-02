@@ -13,8 +13,9 @@ import {
   Spinner,
 } from "reactstrap";
 import * as yup from "yup";
-import { handleUserRegistration } from "../../redux/action/auth";
+
 import Swal from "sweetalert2";
+import { handleUserRegistration } from "../../redux/action/authActions";
 
 const SignUpPage = () => {
   const { isLoggedIn } = useSelector((state) => state.auth);
@@ -27,7 +28,7 @@ const SignUpPage = () => {
     if (isLoggedIn) {
       navigate("/");
       return;
-    }
+    } // Redirect User to home page if he/she already logged in
   }, [isLoggedIn]);
 
   const SignUpSchema = yup.object().shape({
@@ -40,6 +41,7 @@ const SignUpPage = () => {
       .oneOf([yup.ref("password"), null], "Passwords must match")
       .label("Confirm Password"),
   });
+
   const initialValues = {
     email: "",
     password: "",
@@ -48,7 +50,7 @@ const SignUpPage = () => {
 
   const onFormSubmit = async (data) => {
     const { email, password } = data;
-    console.log(data);
+
     try {
       setLoading(true);
       setResErr("");
@@ -89,7 +91,7 @@ const SignUpPage = () => {
             validateOnChange={true}
             validateOnMount={false}
           >
-            {({ errors, handleSubmit }) => (
+            {({ touched, errors, handleSubmit }) => (
               <Form onSubmit={handleSubmit}>
                 <FormGroup>
                   <Label for="email">Email</Label>
@@ -99,7 +101,7 @@ const SignUpPage = () => {
                     id="email"
                     placeholder="Enter your email"
                     as={Input}
-                    invalid={!!errors.email}
+                    invalid={touched.email && !!errors.email}
                   />
                   <ErrorMessage name="email" component={FormFeedback} />
                 </FormGroup>
@@ -112,7 +114,7 @@ const SignUpPage = () => {
                     id="password"
                     placeholder="Enter your password"
                     as={Input}
-                    invalid={!!errors.password}
+                    invalid={touched.password && !!errors.password}
                   />
                   <ErrorMessage name="password" component={FormFeedback} />
                 </FormGroup>
@@ -124,7 +126,9 @@ const SignUpPage = () => {
                     id="confirmPassword"
                     placeholder="Confirm your password"
                     as={Input}
-                    invalid={!!errors.confirmPassword}
+                    invalid={
+                      touched.confirmPassword && !!errors.confirmPassword
+                    }
                   />
                   <ErrorMessage
                     name="confirmPassword"

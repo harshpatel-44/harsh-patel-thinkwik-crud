@@ -1,7 +1,7 @@
-import { USER_LOG_IN, USER_LOG_OUT } from "../actionTypes/authentication";
+import { USER_LOG_IN, USER_LOG_OUT } from "../actionTypes/authActionTypes";
 
 const initialState = {
-  isLoggedIn: true,
+  isLoggedIn: false,
 };
 
 const authReducer = (state = initialState, action) => {
@@ -12,12 +12,14 @@ const authReducer = (state = initialState, action) => {
         isLoggedIn: true,
       };
     }
+
     case USER_LOG_OUT: {
       return {
         ...state,
         isLoggedIn: false,
       };
     }
+
     default:
       return state;
   }

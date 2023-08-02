@@ -1,5 +1,5 @@
 import { ErrorMessage, Field, Formik } from "formik";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Link } from "react-router-dom";
@@ -13,7 +13,7 @@ import {
   Spinner,
 } from "reactstrap";
 import * as yup from "yup";
-import { handleUserLogin } from "../../redux/action/auth";
+import { handleUserLogin } from "../../redux/action/authActions";
 
 const LogInPage = () => {
   const { isLoggedIn } = useSelector((state) => state.auth);
@@ -26,7 +26,7 @@ const LogInPage = () => {
     if (isLoggedIn) {
       navigate("/");
       return;
-    }
+    } // Redirect User to home page if he/she already logged in
   }, [isLoggedIn]);
 
   const LogInSchema = yup.object().shape({
@@ -39,21 +39,21 @@ const LogInPage = () => {
     password: "",
   };
 
-  const onFormSubmit = async (data) => {
-    console.log(data);
-
-    try {
-      setLoading(true);
-      setResErr("");
-
-      const logInRes = await handleUserLogin(data);
-    } catch (e) {
-      const errMsg = e?.split("/")[1];
-      setResErr(errMsg);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const onFormSubmit = useCallback(
+    async (data) => {
+      try {
+        setLoading(true);
+        setResErr("");
+        const logInRes = await handleUserLogin(data);
+      } catch (e) {
+        const errMsg = e?.split("/")[1];
+        setResErr(errMsg);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [handleUserLogin]
+  );
 
   return (
     <div className="App">
@@ -72,7 +72,7 @@ const LogInPage = () => {
             validateOnChange={true}
             validateOnMount={false}
           >
-            {({ errors, handleSubmit }) => (
+            {({ errors, touched, handleSubmit }) => (
               <Form onSubmit={handleSubmit}>
                 <FormGroup>
                   <Label for="email">Email</Label>
@@ -82,7 +82,7 @@ const LogInPage = () => {
                     id="email"
                     placeholder="Enter your email"
                     as={Input}
-                    invalid={!!errors.email}
+                    invalid={touched.email && !!errors.email}
                   />
                   <ErrorMessage name="email" component={FormFeedback} />
                 </FormGroup>
@@ -95,7 +95,7 @@ const LogInPage = () => {
                     id="password"
                     placeholder="Enter your password"
                     as={Input}
-                    invalid={!!errors.password}
+                    invalid={touched.password && !!errors.password}
                   />
                   <ErrorMessage name="password" component={FormFeedback} />
                 </FormGroup>

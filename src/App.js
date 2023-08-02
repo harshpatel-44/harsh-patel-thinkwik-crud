@@ -38,6 +38,10 @@ const App = () => {
             path="*"
             element={<ProtectedRoute ChildComponent={ErrorPage} />}
           />
+          <Route
+            path="error"
+            element={<ProtectedRoute ChildComponent={ErrorPage} />}
+          />
           <Route path="login" element={<LoginPage />} exact={true} />
           <Route path="signup" element={<SignUpPage />} exact={true} />
           <Route

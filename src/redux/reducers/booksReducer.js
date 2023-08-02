@@ -10,21 +10,29 @@ const initialState = { booksData: [...DUMMY_BOOKS_DATA] };
 const booksReducer = (state = initialState, action) => {
   switch (action.type) {
     case ADD_BOOK: {
+      // Action payload is new book data
       return {
         ...state,
         booksData: [...state.booksData, action.payload],
+        //Add new book data in previous bookslist data
       };
     }
+
     case REMOVE_BOOK: {
+      // Action payload is remove book id
       const filteredData = state.booksData?.filter(
         (book) => book.id !== action.payload
       );
+      //Remove selected book data from bookslist data
+
       return {
         ...state,
         booksData: [...filteredData],
       };
     }
+
     case UPDATE_BOOK: {
+      // Action payload is update data of selected book
       const updatedData = state.booksData?.map((book) => {
         if (book.id === action.payload.id) {
           return { ...action.payload };
@@ -32,6 +40,7 @@ const booksReducer = (state = initialState, action) => {
           return { ...book };
         }
       });
+      //Update books data with new book data in bookslist
 
       return {
         ...state,
