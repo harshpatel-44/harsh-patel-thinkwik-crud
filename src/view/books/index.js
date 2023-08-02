@@ -2,19 +2,23 @@ import React, { useCallback, useState } from "react";
 import { useSelector } from "react-redux";
 import { Button, Col, Container, Input, Row, Spinner } from "reactstrap";
 import BookCard from "./bookCard/BookCard";
+import { handleRemoveBook } from "../../redux/action/bookActions";
+import { useNavigate } from "react-router";
 
 const perPage = 6;
 const sortOptions = ["--", "asc", "desc"];
 
 const ascSorting = (arrInput) =>
   [...arrInput].sort(function (a, b) {
-    if (a.title < b.title) return -1;
-    if (a.title > b.title) return 1;
+    if (a.title.toLowerCase() < b.title.toLowerCase()) return -1;
+    if (a.title.toLowerCase() > b.title.toLowerCase()) return 1;
     return 0;
   });
 
 const BooksList = () => {
   const { booksData } = useSelector((state) => state.books);
+
+  const navigate = useNavigate();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [sortDirection, setSortDirection] = useState("--");
@@ -22,26 +26,28 @@ const BooksList = () => {
 
   const totalPages = Math.ceil(booksData.length / perPage);
 
-  const onActionClick = (book, actionType) => {
-    console.log(book);
-    switch (actionType) {
-      case "edit": {
-        console.log("edit");
-        break;
+  const onActionClick = useCallback(
+    async (book, actionType) => {
+      switch (actionType) {
+        case "edit": {
+          navigate("edit/" + book.id);
+          break;
+        }
+        case "delete": {
+          const deleteBookRes = await handleRemoveBook(book.id);
+          break;
+        }
+        default: {
+        }
       }
-      case "delete": {
-        console.log("delete");
-        break;
-      }
-      default: {
-      }
-    }
-  };
+    },
+    [navigate, handleRemoveBook]
+  );
 
-  const handleBooksSorting = (e) => {
+  const handleBooksSorting = useCallback((e) => {
     const sortType = e.target.value;
     setSortDirection(sortType);
-  };
+  }, []);
 
   const handlePrevPage = useCallback(
     () => currentPage > 1 && setCurrentPage(currentPage - 1),

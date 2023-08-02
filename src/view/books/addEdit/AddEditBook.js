@@ -1,7 +1,12 @@
 import { ErrorMessage, Field, Formik, useFormik } from "formik";
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { Link } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -36,9 +41,10 @@ const AddEditBook = () => {
   const { booksData } = useSelector((state) => state.books);
 
   const navigate = useNavigate();
+  const { bookId } = useParams();
+  const [editBookData, setEditBookData] = useState({});
   const [isLoading, setLoading] = useState(false);
   const [isEdit, setEdit] = useState(false);
-  const [resErr, setResErr] = useState("");
 
   const BookFormSchema = yup.object().shape({
     title: yup.string().trim().required().label("Title"),
@@ -59,13 +65,12 @@ const AddEditBook = () => {
   });
 
   const onFormSubmit = async (values) => {
-    console.log(values);
     const { title, author, publishedYear, genre } = values;
     try {
       setLoading(true);
-      setResErr("");
+
       const apiData = {
-        id: isEdit ? booksData.id : uuidv4(),
+        id: isEdit ? editBookData.id : uuidv4(),
         title,
         author,
         year: publishedYear,
@@ -91,16 +96,30 @@ const AddEditBook = () => {
     }
   };
 
-  const { handleSubmit, errors, touched, handleChange } = useFormik({
-    initialValues: {
-      title: "",
-      author: "",
-      publishedYear: null,
-      genre: "",
-    },
-    validationSchema: BookFormSchema,
-    onSubmit: onFormSubmit,
-  });
+  const { handleSubmit, errors, touched, handleChange, setFieldValue, values } =
+    useFormik({
+      initialValues: {
+        title: "",
+        author: "",
+        publishedYear: "",
+        genre: "",
+      },
+      validationSchema: BookFormSchema,
+      onSubmit: onFormSubmit,
+    });
+
+  useEffect(() => {
+    const editBook = booksData.filter((book) => book.id === +bookId);
+    console.log(editBook);
+    if (editBook.length) {
+      setEdit(true);
+      setEditBookData(editBook[0]);
+      setFieldValue("title", editBook[0].title);
+      setFieldValue("author", editBook[0].author);
+      setFieldValue("publishedYear", editBook[0].year);
+      setFieldValue("genre", editBook[0].genre);
+    }
+  }, [bookId]);
 
   const renderGenreList = useCallback(
     () =>
@@ -116,12 +135,7 @@ const AddEditBook = () => {
     <div className="App">
       <div className="auth-wrapper">
         <div className="auth-inner">
-          <h3>Add Book</h3>
-          {resErr && (
-            <div className="alert alert-danger" role="alert">
-              {resErr}
-            </div>
-          )}
+          <h3>{isEdit ? "Edit " : "Add "} Book</h3>
 
           <Form onSubmit={handleSubmit}>
             <FormGroup>
@@ -132,6 +146,7 @@ const AddEditBook = () => {
                 id="title"
                 placeholder="Enter your title"
                 onChange={handleChange}
+                value={values.title}
                 invalid={touched.title && !!errors.title}
               />
 
@@ -146,6 +161,7 @@ const AddEditBook = () => {
                 id="author"
                 placeholder="Enter your author"
                 onChange={handleChange}
+                value={values.author}
                 invalid={touched.author && !!errors.author}
               />
               {errors?.author && <FormFeedback> {errors?.author}</FormFeedback>}
@@ -158,6 +174,7 @@ const AddEditBook = () => {
                 name="publishedYear"
                 onChange={handleChange}
                 placeholder="Enter Published Year"
+                value={values.publishedYear}
                 invalid={touched.publishedYear && !!errors.publishedYear}
               />
               {errors?.publishedYear && (
@@ -173,6 +190,7 @@ const AddEditBook = () => {
                 name="genre"
                 onChange={handleChange}
                 placeholder="Select Genre"
+                value={values.genre}
                 invalid={touched.genre && !!errors.genre}
               >
                 {renderGenreList()}
@@ -186,6 +204,8 @@ const AddEditBook = () => {
                   <>
                     <Spinner size={"sm"} /> ...Loading
                   </>
+                ) : isEdit ? (
+                  "Update"
                 ) : (
                   "Add"
                 )}
