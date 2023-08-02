@@ -107,7 +107,7 @@ const AddEditBook = () => {
   useEffect(() => {
     if (!bookId) return;
 
-    const editBook = booksData.filter((book) => book.id === +bookId);
+    const editBook = booksData.filter((book) => book.id.toString() === bookId);
 
     //If book data is available based on book Id params form field will be auto fill
     if (editBook.length) {
