@@ -89,6 +89,7 @@ const BooksList = () => {
                 id={book.id}
                 title={book.title}
                 author={book.author}
+                genre={book.genre}
                 year={book.year}
                 onEditBook={onActionClick.bind(null, book, "edit")}
                 onDeleteBook={onActionClick.bind(null, book, "delete")}

@@ -12,16 +12,30 @@ const booksReducer = (state = initialState, action) => {
     case ADD_BOOK: {
       return {
         ...state,
+        booksData: [...state.booksData, action.payload],
       };
     }
     case REMOVE_BOOK: {
+      const filteredData = state.booksData?.filter(
+        (book) => book.id !== action.payload
+      );
       return {
         ...state,
+        booksData: [...filteredData],
       };
     }
     case UPDATE_BOOK: {
+      const updatedData = state.booksData?.map((book) => {
+        if (book.id === action.payload.id) {
+          return { ...action.payload };
+        } else {
+          return { ...book };
+        }
+      });
+
       return {
         ...state,
+        booksData: [...updatedData],
       };
     }
     default:
