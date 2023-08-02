@@ -4,16 +4,26 @@ import { Button, Col, Container, Input, Row, Spinner } from "reactstrap";
 import BookCard from "./bookCard/BookCard";
 
 const perPage = 6;
+const sortOptions = ["--", "asc", "desc"];
+
+const ascSorting = (arrInput) =>
+  [...arrInput].sort(function (a, b) {
+    if (a.title < b.title) return -1;
+    if (a.title > b.title) return 1;
+    return 0;
+  });
 
 const BooksList = () => {
   const { booksData } = useSelector((state) => state.books);
+
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortDirection, setSortDirection] = useState("--");
   const [isLoading, setLoading] = useState(false);
 
-  console.log(booksData);
   const totalPages = Math.ceil(booksData.length / perPage);
 
   const onActionClick = (book, actionType) => {
+    console.log(book);
     switch (actionType) {
       case "edit": {
         console.log("edit");
@@ -30,6 +40,7 @@ const BooksList = () => {
 
   const handleBooksSorting = (e) => {
     const sortType = e.target.value;
+    setSortDirection(sortType);
   };
 
   const handlePrevPage = useCallback(
@@ -42,6 +53,10 @@ const BooksList = () => {
     [currentPage]
   );
 
+  const sortOptionsRender = useCallback(() => {
+    return sortOptions.map((option) => <option key={option}>{option}</option>);
+  }, []);
+
   const renderBooks = useCallback(() => {
     if (!booksData.length) {
       return (
@@ -51,9 +66,19 @@ const BooksList = () => {
       );
     }
 
+    let sortBookData;
+
+    if (sortDirection === "asc") {
+      sortBookData = ascSorting(booksData);
+    } else if (sortDirection === "desc") {
+      sortBookData = ascSorting(booksData).reverse();
+    } else {
+      sortBookData = [...booksData];
+    }
+
     const startIndex = (currentPage - 1) * perPage;
     const endIndex = startIndex + perPage;
-    const filteredData = booksData.slice(startIndex, endIndex);
+    const filteredData = sortBookData.slice(startIndex, endIndex);
 
     return (
       <>
@@ -73,7 +98,7 @@ const BooksList = () => {
         })}
       </>
     );
-  }, [booksData, currentPage]);
+  }, [booksData, currentPage, sortDirection]);
 
   return (
     <Container>
@@ -85,11 +110,10 @@ const BooksList = () => {
             type="select"
             id="sortSelect"
             name="sortSelect"
+            value={sortDirection}
             onChange={handleBooksSorting}
           >
-            <option>---</option>
-            <option>asc</option>
-            <option>desc</option>
+            {sortOptionsRender()}
           </Input>
         </Col>
       </Row>
