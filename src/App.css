@@ -59,6 +59,15 @@ html,
   padding-bottom: 20px;
 }
 
+.same-height-grid.row {
+  display: flex;
+  flex-wrap: wrap;
+}
+.same-height-grid.row > .col {
+  display: flex;
+  flex-direction: column;
+}
+
 .five-line-text-truncate {
   overflow: hidden;
   text-overflow: ellipsis;
